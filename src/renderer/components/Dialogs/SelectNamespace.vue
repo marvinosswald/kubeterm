@@ -32,6 +32,13 @@
       filteredItems () {
         return this.items.filter((item) => {
           return item.metadata.name.indexOf(this.search) !== -1
+        }).sort((a, b) => {
+          if (a.metadata.name < b.metadata.name) {
+            return -1
+          } else if (a.metadata.name > b.metadata.name) {
+            return 1
+          }
+          return 0
         })
       }
     },
