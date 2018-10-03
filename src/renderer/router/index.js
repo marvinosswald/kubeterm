@@ -11,6 +11,11 @@ export default new Router({
       component: require('@/components/Main').default
     },
     {
+      path: '/log-monitor',
+      name: 'LogMonitor',
+      component: require('@/components/LogMonitor').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

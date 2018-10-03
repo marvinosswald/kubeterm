@@ -18,6 +18,7 @@
 </template>
 
 <script>
+  import { mapActions } from 'vuex'
   const k8s = require('@kubernetes/client-node')
   export default {
     name: 'SelectNamespace',
@@ -31,6 +32,7 @@
     computed: {
       filteredItems () {
         return this.items.filter((item) => {
+          this.selectedIndex = undefined
           return item.metadata.name.indexOf(this.search) !== -1
         }).sort((a, b) => {
           if (a.metadata.name < b.metadata.name) {
@@ -50,7 +52,10 @@
         this.setSelectedIndex(this.selectedIndex + 1)
       },
       submit () {
-        this.$store.dispatch('setCurrentNamespace', this.items[this.selectedIndex])
+        if (this.filteredItems.length === 1) {
+          this.selectedIndex = 0
+        }
+        this.setCurrentNamespace(this.filteredItems[this.selectedIndex])
         this.$modal.hide('select-namespace')
       },
       setSelectedIndex (value) {
@@ -59,7 +64,10 @@
         } else if (this.selectedIndex === undefined) {
           this.selectedIndex = 0
         }
-      }
+      },
+      ...mapActions([
+        'setCurrentNamespace'
+      ])
     },
     mounted () {
       const kc = new k8s.KubeConfig()

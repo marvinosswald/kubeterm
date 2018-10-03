@@ -16,11 +16,11 @@
 <style>
   /*
     #23272A
-    #2C2F33
-    #99AAB5
-    #FFFFFF
-    #7289DA
-    #E6375A
+      #2C2F33
+      #99AAB5
+      #FFFFFF
+      #7289DA
+      #E6375A
    */
   @import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono');
 

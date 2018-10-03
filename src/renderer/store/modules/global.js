@@ -11,7 +11,7 @@ const mutations = {
 
 const actions = {
   setCurrentNamespace ({ commit }, namespace) {
-    // do something async
+    console.log(namespace)
     commit('setCurrentNamespace', { namespace: namespace.metadata.name })
   }
 }

@@ -1,13 +1,24 @@
 <template>
     <div>
         <input type="text" class="minimal"
+               autofocus
                @keyup.up="up"
                @keyup.down="down"
-               @keyup.l="openLogs"
-               v-model="search">
+               @keyup.ctrl.l="openLogs"
+               @keyup.ctrl.d="deletePod"
+               @keyup.F1="setExpandedIndex(selectedIndex)"
+               v-model="search"
+                ref="search">
         <ul class="list">
             <li v-for="(pod, index) in filteredItems" :key="pod.metadata.name">
-                <PodListItem :pod="pod" :index="index" :class="{active: index === selectedIndex}"></PodListItem>
+                <PodListItem
+                        :pod="pod"
+                        :index="index"
+                        :class="{active: index === selectedIndex}"
+                        :expanded="index === expandedIndex"
+                        v-on:beenClicked="selectedIndex = index"
+                        v-on:beenClickedRight="setExpandedIndex(index)"
+                ></PodListItem>
             </li>
             <li v-if="pods.length === 0">
                 No data
@@ -17,8 +28,11 @@
 </template>
 
 <script>
+  import pods from '../repos/pods'
   import PodListItem from './PodList/PodListItem'
-  import { mapGetters } from 'vuex'
+  import { mapState, mapActions } from 'vuex'
+  import Confirm from './Dialogs/Confirm'
+  import { create } from 'vue-modal-dialogs'
   const K8s = require('@kubernetes/client-node')
   export default {
     components: {
@@ -27,18 +41,16 @@
     name: 'PodList',
     data () {
       return {
-        pods: [],
         watcher: undefined,
         selectedIndex: undefined,
+        expandedIndex: undefined,
         search: ''
       }
     },
     computed: {
-      ...mapGetters({
-        currentNamespace: 'currentNamespace'
-      }),
       filteredItems () {
         return this.pods.filter((pod) => {
+          this.selectedIndex = undefined
           return pod.metadata.name.indexOf(this.search) !== -1
         }).sort((a, b) => {
           if (a.metadata.name < b.metadata.name) {
@@ -48,7 +60,11 @@
           }
           return 0
         })
-      }
+      },
+      ...mapState({
+        currentNamespace: state => state.global.currentNamespace,
+        pods: state => state.pods.pods
+      })
     },
     watch: {
       currentNamespace () {
@@ -56,8 +72,20 @@
       }
     },
     methods: {
+      setExpandedIndex (index) {
+        this.expandedIndex === index ? this.expandedIndex = undefined : this.expandedIndex = this.selectedIndex = index
+      },
       openLogs () {
-
+        window.open('/#log-monitor')
+      },
+      async deletePod () {
+        this.$refs.search.blur()
+        const confirm = create(Confirm, 'title', 'content')
+        const pod = this.filteredItems[this.selectedIndex]
+        if (await confirm('Confirm deletion !', pod.metadata.name)) {
+          pods.deletePod(pod)
+        }
+        this.$refs.search.focus()
       },
       up () {
         this.setSelectedIndex(this.selectedIndex - 1)
@@ -78,9 +106,9 @@
         let watch = new K8s.Watch(kc)
         if (this.watcher !== undefined) {
           this.watcher.abort()
-          this.pods = []
-          this.selectedIndex = undefined
         }
+        this.resetPods()
+        this.selectedIndex = undefined
         this.watcher = watch.watch(resource, params, cb, errCb)
         return this.watcher
       },
@@ -91,19 +119,11 @@
           // callback is called for each received object.
           (type, obj) => {
             if (type === 'ADDED') {
-              this.pods.push(obj)
+              this.addPod(obj)
             } else if (type === 'MODIFIED') {
-              for (const [i, pod] in this.pods.entries()) {
-                if (pod.metadata.name === obj.metadata.name) {
-                  this.$set(this.pods, i, obj)
-                }
-              }
+              this.updatePod(obj)
             } else if (type === 'DELETED') {
-              for (const [i, pod] in this.pods.entries()) {
-                if (pod.metadata.name === obj.metadata.name) {
-                  this.pods.splice(i, 1)
-                }
-              }
+              this.removePod(obj)
             } else {
               console.log('unknown type: ' + type)
             }
@@ -114,7 +134,14 @@
               console.log(err)
             }
           })
-      }
+        this.$refs.search.focus()
+      },
+      ...mapActions({
+        addPod: 'pods/add',
+        updatePod: 'pods/update',
+        removePod: 'pods/remove',
+        resetPods: 'pods/reset'
+      })
     },
     mounted () {
       this.startWatcher()
