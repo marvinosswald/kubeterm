@@ -75,4 +75,14 @@
         font-weight: 700
       footer
         margin: 5px 0
+  .container
+    display: flex
+    flex-direction: column
+    .column
+      flex-direction: column
+    .row
+      display: flex
+      flex-direction: row
+    .space-between
+      justify-content: space-between
 </style>

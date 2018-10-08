@@ -2,11 +2,13 @@
     <div>
         <input type="text" class="minimal"
                autofocus
-               @keyup.up="up"
-               @keyup.down="down"
-               @keyup.ctrl.l="openLogs"
+               @keydown.up="up"
+               @keydown.down="down"
+               @keyup.ctrl.l="openLogs(selectedIndex)"
                @keyup.ctrl.d="deletePod"
-               @keyup.F1="setExpandedIndex(selectedIndex)"
+               @keyup.ctrl.e="edit"
+               @keyup.F1="toggleExpanded()"
+               @keyup.F8="openTreeView(selectedIndex)"
                v-model="search"
                 ref="search">
         <ul class="list">
@@ -14,10 +16,10 @@
                 <PodListItem
                         :pod="pod"
                         :index="index"
-                        :class="{active: index === selectedIndex}"
-                        :expanded="index === expandedIndex"
+                        :class="{active: podIsActive(pod)}"
+                        :expanded="pod === expanded"
                         v-on:beenClicked="selectedIndex = index"
-                        v-on:beenClickedRight="setExpandedIndex(index)"
+                        v-on:beenClickedRight="toggleExpanded()"
                 ></PodListItem>
             </li>
             <li v-if="pods.length === 0">
@@ -32,8 +34,12 @@
   import PodListItem from './PodList/PodListItem'
   import { mapState, mapActions } from 'vuex'
   import Confirm from './Dialogs/Confirm'
+  import SelectResource from './Dialogs/SelectResource'
   import { create } from 'vue-modal-dialogs'
+  // const { exec } = require('child_process')
   const K8s = require('@kubernetes/client-node')
+  const kc = new K8s.KubeConfig()
+  kc.loadFromDefault()
   export default {
     components: {
       PodListItem
@@ -42,15 +48,15 @@
     data () {
       return {
         watcher: undefined,
-        selectedIndex: undefined,
-        expandedIndex: undefined,
+        selectedPods: [],
+        expanded: undefined,
         search: ''
       }
     },
     computed: {
       filteredItems () {
         return this.pods.filter((pod) => {
-          this.selectedIndex = undefined
+          this.selectedPods = []
           return pod.metadata.name.indexOf(this.search) !== -1
         }).sort((a, b) => {
           if (a.metadata.name < b.metadata.name) {
@@ -72,11 +78,38 @@
       }
     },
     methods: {
-      setExpandedIndex (index) {
-        this.expandedIndex === index ? this.expandedIndex = undefined : this.expandedIndex = this.selectedIndex = index
+      podIsActive (pod) {
+        return this.selectedPods.includes(pod)
       },
-      openLogs () {
-        window.open('/#log-monitor')
+      async edit () {
+        console.log('test')
+        const resourceDialog = create(SelectResource, 'items')
+        let resource = resourceDialog([{label: 'a'}, {label: 'b'}])
+        alert(resource)
+        /* const { stdout, stderr } = await exec('kubectl edit deploy keycloak')
+        stdout.on('data', (data) => {
+          console.log(data)
+        })
+        console.log('stdout:', stdout)
+        console.log('stderr:', stderr) */
+      },
+      // todo: refactor to use array
+      toggleExpanded () {
+        if (this.selectedPods.length === 1 && this.expanded !== this.selectedPods[0]) {
+          this.expanded = this.selectedPods[0]
+        } else if (this.expanded === this.selectedPods[0]) {
+          this.expanded = undefined
+        }
+      },
+      openLogs (index) {
+        const pod = this.pods[index]
+        localStorage.setItem(pod.metadata.uid, JSON.stringify(pod))
+        window.open('/#log-monitor?uid=' + pod.metadata.uid)
+      },
+      openTreeView (index) {
+        const pod = this.pods[index]
+        localStorage.setItem(pod.metadata.uid, JSON.stringify(pod))
+        window.open('/#json-tree-view?uid=' + pod.metadata.uid)
       },
       async deletePod () {
         this.$refs.search.blur()
@@ -88,10 +121,30 @@
         this.$refs.search.focus()
       },
       up () {
-        this.setSelectedIndex(this.selectedIndex - 1)
+        this.setPreviousPod()
       },
       down () {
-        this.setSelectedIndex(this.selectedIndex + 1)
+        this.setNextPod()
+      },
+      setNextPod () {
+        if (this.selectedPods === []) {
+          this.selectedPods = [this.filteredItems[0]]
+        } else {
+          const pod = this.selectedPods[this.selectedPods.length - 1]
+          const currentPodIndex = this.filteredItems.indexOf(pod)
+          if (currentPodIndex < this.filteredItems.length - 1) {
+            this.selectedPods = [this.filteredItems[currentPodIndex + 1]]
+          }
+        }
+      },
+      setPreviousPod () {
+        if (this.selectedPods !== []) {
+          const pod = this.selectedPods[this.selectedPods.length - 1]
+          const currentPodIndex = this.filteredItems.indexOf(pod)
+          if (currentPodIndex !== 0) {
+            this.selectedPods = [this.filteredItems[currentPodIndex - 1]]
+          }
+        }
       },
       setSelectedIndex (value) {
         if (this.selectedIndex !== undefined && value >= 0 && value < Object.keys(this.pods).length) {
@@ -100,16 +153,14 @@
           this.selectedIndex = 0
         }
       },
-      getWatcher (resource, params = {}, cb, errCb) {
-        const kc = new K8s.KubeConfig()
-        kc.loadFromDefault()
+      getWatcher (resource, params = {}, cb, doneCb) {
         let watch = new K8s.Watch(kc)
         if (this.watcher !== undefined) {
           this.watcher.abort()
         }
         this.resetPods()
         this.selectedIndex = undefined
-        this.watcher = watch.watch(resource, params, cb, errCb)
+        this.watcher = watch.watch(resource, params, cb, doneCb)
         return this.watcher
       },
       startWatcher () {
@@ -133,6 +184,7 @@
             if (err) {
               console.log(err)
             }
+            this.startWatcher()
           })
         this.$refs.search.focus()
       },

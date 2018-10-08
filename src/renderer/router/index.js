@@ -16,6 +16,11 @@ export default new Router({
       component: require('@/components/LogMonitor').default
     },
     {
+      path: '/json-tree-view',
+      name: 'JsonTreeView',
+      component: require('@/components/JsonTreeView').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

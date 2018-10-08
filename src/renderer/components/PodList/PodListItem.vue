@@ -2,22 +2,31 @@
     <div class="list-item-inner container" @click.left="$emit('beenClicked')" @click.right="$emit('beenClickedRight')">
         <div class="row">
             <div class="status">
-                <status-indicator :active="isActive" :positive="isPositive" :intermediary="isIntermediary" :negative="isNegative" :pulse="isActive || isNegative || isIntermediary" ></status-indicator>
+                <status-indicator :active="isTerminated" :positive="isPositive" :intermediary="isIntermediary" :negative="isNegative" :pulse="isTerminated || isNegative || isIntermediary" ></status-indicator>
             </div>
             <div class="label">
                 <span class="workload">{{workload}}</span>-<span class="ownerReference">{{ownerReference}}</span>-{{podName}}
             </div>
+            <div class="ready">
+                <span v-if="readyState.percent !== 100">
+                    {{readyState.label}}
+                </span>
+            </div>
             <span class="restarts">
-                {{pod.status.containerStatuses ? pod.status.containerStatuses[0].restartCount : ''}}
+                <span v-if="restarts !== 0">
+                    {{restarts}}
+                </span>
             </span>
             <span class="age">
-            {{pod.status.startTime | moment("from", "now", true)}}
-        </span>
+                {{pod.status.startTime | moment("from", "now", true)}}
+            </span>
         </div>
         <div class="expanded-content container" v-if="expanded">
+            <div v-if="pod.status.containerStatuses">
+                <Container v-for="container in pod.status.containerStatuses" :container="container"></Container>
+            </div>
             <div class="row space-between">
                 <span><span class="key">Phase</span> {{pod.status.phase}}</span>
-                <span><span class="key">Ready</span> {{readyState.label}}</span>
                 <span><span class="key">Host</span> {{pod.status.hostIP}}</span>
             </div>
             <div class="column labels">
@@ -37,9 +46,11 @@
 <script>
   import { StatusIndicator } from 'vue-status-indicator'
   import 'vue-status-indicator/styles.css'
+  import Container from './PodListItem/Container'
 
   export default {
     components: {
+      Container,
       StatusIndicator
     },
     name: 'PodListItem',
@@ -47,18 +58,25 @@
     computed: {
       isNegative () {
         const state = this.pod.status.phase
-        return state === 'Failed' || state === 'CrashLoopBackOff' || state === 'Error'
+        return !this.isTerminated && (state === 'Failed' || state === 'CrashLoopBackOff' || state === 'Error')
       },
       isPositive () {
         const state = this.pod.status.phase
-        return (state === 'Running' || state === 'Completed' || state === 'Succeeded') && this.pod.metadata.deletionTimestamp === undefined && this.readyState.percent === 100
+        return !this.isTerminated && ((state === 'Running' || state === 'Completed' || state === 'Succeeded') && this.pod.metadata.deletionTimestamp === undefined && this.readyState.percent === 100)
       },
       isIntermediary () {
         const state = this.pod.status.phase
-        return state === 'Pending' || state === 'ContainerCreating' || this.readyState.percent !== 100
+        return !this.isTerminated && (state === 'Pending' || state === 'ContainerCreating' || this.readyState.percent !== 100)
       },
-      isActive () {
+      isTerminated () {
         return this.pod.metadata.deletionTimestamp !== undefined
+      },
+      restarts () {
+        let restarts = 0
+        for (let container of this.pod.status.containerStatuses) {
+          restarts += container.restartCount
+        }
+        return restarts
       },
       readyState () {
         if (!this.pod.status.containerStatuses) {
@@ -114,18 +132,31 @@
             color: rgba(255,255,255,0.5)
         .workload
             color: #fff
+    .container-label
+        align-self: flex-start
+        flex-grow: 1
+        color: #fff
+    .ready
+        min-width: 10vw
+        align-self: flex-end
     .restarts
         min-width: 5vw
+        color: orange
     .active
         .label
             background: #e6375a
+        .age
+            color: #fff
+        .restarts
+            color: #fff
     .age
         align-self: flex-end
         min-width: 12vw
+        color: grey
     .key
         background: #99AAB5
     .expanded-content
-        margin: 0 0 0 15px
+        margin: 0 -5px 0 15px
         padding: 5px
         display: block
         border: 1px #fff dashed
@@ -135,14 +166,4 @@
                 margin-left: 15px
             li
                 text-align: left
-    .container
-        display: flex
-        flex-direction: column
-        .column
-            flex-direction: column
-        .row
-            display: flex
-            flex-direction: row
-        .space-between
-            justify-content: space-between
 </style>

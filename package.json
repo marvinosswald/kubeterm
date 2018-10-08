@@ -1,8 +1,8 @@
 {
-  "name": "kubeit",
+  "name": "KubeTerm",
   "version": "0.0.1",
   "author": "Marvin Oßwald <mail@marvinosswald.de>",
-  "description": "An electron-vue project",
+  "description": "A Terminal for kubernetes operators",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
@@ -63,9 +63,11 @@
     "@kubernetes/client-node": "^0.6.0",
     "axios": "^0.18.0",
     "i": "^0.3.6",
+    "jsonpath": "^1.0.0",
     "npm": "^6.4.1",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
+    "vue-json-tree-view": "^2.1.4",
     "vue-modal-dialogs": "^3.0.0",
     "vue-router": "^3.0.1",
     "vue-status-indicator": "^1.1.0",
