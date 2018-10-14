@@ -10,6 +10,7 @@
                 @keyup.native.F8="openTreeView()"
                 v-on:input="setSearchInput"
                 v-on:filter="applyFilter"
+                :filterOptions="this.flatTree(this.filteredItems[0])"
                 ref="search"
         />
         <ul class="list">
@@ -88,11 +89,23 @@
     },
     methods: {
       pairsInObject (obj, pairs) {
-        const _flatten = (o) => [].concat(...Object.keys(o).map(k => typeof o[k] === 'object' ? _flatten(o[k]) : ({[k]: o[k]})))
-        const flattend = Object.assign({}, ..._flatten(obj))
-        console.log(flattend)
-
+        const flattend = this.flatTree(obj)
+        const keys = Object.keys(flattend)
+        for (let pair of pairs) {
+          let i = keys.indexOf(pair.key.toLowerCase())
+          if (i === -1 || flattend[keys[i]] !== pair.value) {
+            return false
+          }
+        }
         return true
+      },
+      flatTree (tree) {
+        const makeFlat = (o) => {
+          if (o) {
+            return [].concat(...Object.keys(o).map(k => typeof o[k] === 'object' ? makeFlat(o[k]) : {[k.toLowerCase()]: o[k]}))
+          }
+        }
+        return Object.assign({}, ...makeFlat(tree))
       },
       applyFilter (filter) {
         this.filter = filter
