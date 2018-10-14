@@ -13,15 +13,14 @@
     data () {
       return {
         lines: [],
-        pod: {}
+        pods: {}
       }
     },
     mounted () {
-      const uid = this.$route.query.uid
-      const jsonString = localStorage.getItem(uid)
-      this.pod = JSON.parse(jsonString)
-      localStorage.removeItem(uid)
-      this.getLogs(this.pod)
+      const jsonString = localStorage.getItem('LogsOfPodsToWatch')
+      this.pods = JSON.parse(jsonString)
+      localStorage.removeItem('LogsOfPodsToWatch')
+      this.getLogs(this.pods[0])
     },
     methods: {
       async getLogs (pod) {

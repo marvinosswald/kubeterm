@@ -1,16 +1,17 @@
 <template>
     <div>
-        <input type="text" class="minimal"
-               autofocus
-               @keydown.up="up"
-               @keydown.down="down"
-               @keyup.ctrl.l="openLogs(selectedIndex)"
-               @keyup.ctrl.d="deletePod"
-               @keyup.ctrl.e="edit"
-               @keyup.F1="toggleExpanded()"
-               @keyup.F8="openTreeView(selectedIndex)"
-               v-model="search"
-                ref="search">
+        <Search
+                @keydown.native.up="up"
+                @keydown.native.down="down"
+                @keyup.native.ctrl.l="openLogs"
+                @keyup.native.ctrl.d="deletePod"
+                @keyup.native.ctrl.e="edit"
+                @keyup.native.F1="toggleExpanded()"
+                @keyup.native.F8="openTreeView()"
+                v-on:input="setSearchInput"
+                v-on:filter="applyFilter"
+                ref="search"
+        />
         <ul class="list">
             <li v-for="(pod, index) in filteredItems" :key="pod.metadata.name">
                 <PodListItem
@@ -36,12 +37,14 @@
   import Confirm from './Dialogs/Confirm'
   import SelectResource from './Dialogs/SelectResource'
   import { create } from 'vue-modal-dialogs'
+  import Search from './Elements/Search'
   // const { exec } = require('child_process')
   const K8s = require('@kubernetes/client-node')
   const kc = new K8s.KubeConfig()
   kc.loadFromDefault()
   export default {
     components: {
+      Search,
       PodListItem
     },
     name: 'PodList',
@@ -50,15 +53,20 @@
         watcher: undefined,
         selectedPods: [],
         expanded: undefined,
-        search: ''
+        search: '',
+        filter: []
       }
     },
     computed: {
       filteredItems () {
-        return this.pods.filter((pod) => {
+        let items = this.pods.filter((pod) => {
           this.selectedPods = []
           return pod.metadata.name.indexOf(this.search) !== -1
-        }).sort((a, b) => {
+        })
+        if (this.filter.length !== 0) {
+          items = items.filter((pod) => this.pairsInObject(pod, this.filter))
+        }
+        items = items.sort((a, b) => {
           if (a.metadata.name < b.metadata.name) {
             return -1
           } else if (a.metadata.name > b.metadata.name) {
@@ -66,6 +74,7 @@
           }
           return 0
         })
+        return items
       },
       ...mapState({
         currentNamespace: state => state.global.currentNamespace,
@@ -78,6 +87,19 @@
       }
     },
     methods: {
+      pairsInObject (obj, pairs) {
+        const _flatten = (o) => [].concat(...Object.keys(o).map(k => typeof o[k] === 'object' ? _flatten(o[k]) : ({[k]: o[k]})))
+        const flattend = Object.assign({}, ..._flatten(obj))
+        console.log(flattend)
+
+        return true
+      },
+      applyFilter (filter) {
+        this.filter = filter
+      },
+      setSearchInput (input) {
+        this.search = input
+      },
       podIsActive (pod) {
         return this.selectedPods.includes(pod)
       },
@@ -101,15 +123,16 @@
           this.expanded = undefined
         }
       },
-      openLogs (index) {
-        const pod = this.pods[index]
-        localStorage.setItem(pod.metadata.uid, JSON.stringify(pod))
-        window.open('/#log-monitor?uid=' + pod.metadata.uid)
+      openLogs () {
+        localStorage.setItem('LogsOfPodsToWatch', JSON.stringify(this.selectedPods))
+        window.open('/#log-monitor')
       },
-      openTreeView (index) {
-        const pod = this.pods[index]
-        localStorage.setItem(pod.metadata.uid, JSON.stringify(pod))
-        window.open('/#json-tree-view?uid=' + pod.metadata.uid)
+      openTreeView () {
+        if (this.selectedPods.length === 1) {
+          const pod = this.selectedPods[0]
+          localStorage.setItem(pod.metadata.uid, JSON.stringify(pod))
+          window.open('/#json-tree-view?uid=' + pod.metadata.uid)
+        }
       },
       async deletePod () {
         this.$refs.search.blur()
