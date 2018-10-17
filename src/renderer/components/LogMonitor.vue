@@ -27,10 +27,15 @@
         const kc = new K8s.KubeConfig()
         kc.loadFromDefault()
         let api = kc.makeApiClient(K8s.Core_v1Api)
-        setInterval(() => this.getContainerLog(api, pod, pod.spec.containers[0].name), 5000)
+        for (let c of pod.spec.containers) {
+          setInterval(() => this.getContainerLog(api, pod, c.name), 5000)
+        }
+        for (let c of pod.spec.initContainers) {
+          setInterval(() => this.getContainerLog(api, pod, c.name), 5000)
+        }
       },
       async getContainerLog (api, pod, containerName) {
-        const logs = await api.readNamespacedPodLog(pod.metadata.name, pod.metadata.namespace, containerName, false, 1024, null, false, 5)
+        const logs = await api.readNamespacedPodLog(pod.metadata.name, pod.metadata.namespace, containerName, false, 1024, null, false, 120)
         if (logs.body !== undefined) {
           this.lines = [...this.lines, ...(logs.body.split('\n'))]
         }

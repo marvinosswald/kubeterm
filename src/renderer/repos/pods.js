@@ -6,5 +6,8 @@ const api = kc.makeApiClient(K8s.Core_v1Api)
 export default {
   deletePod (pod) {
     api.deleteNamespacedPod(pod.metadata.name, pod.metadata.namespace, K8s.V1DeleteOptions)
+  },
+  getEvents (pod) {
+    // whas
   }
 }

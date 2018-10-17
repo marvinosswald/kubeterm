@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="row">
         <input type="text" class="minimal"
                autofocus
                v-model="input"
@@ -90,4 +90,7 @@
             list-style-type: none
         &.show
             display: block
+    input
+        &:focus
+            outline: none
 </style>
