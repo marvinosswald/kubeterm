@@ -21,35 +21,21 @@
                 {{pod.status.startTime | moment("from", "now", true)}}
             </span>
         </div>
-        <div class="expanded-content container" v-if="expanded">
-            <div v-if="pod.status.containerStatuses">
-                <Container v-for="container in pod.status.containerStatuses" :container="container"></Container>
-            </div>
-            <div class="row space-between">
-                <span><span class="key">Phase</span> {{pod.status.phase}}</span>
-                <span><span class="key">Host</span> {{pod.status.hostIP}}</span>
-            </div>
-            <div class="column labels">
-                <span class="key">
-                    Labels
-                </span>
-                <ul>
-                    <li v-for="(value, key) in pod.metadata.labels">
-                        {{key}}: <span class="value">{{value}}</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
+        <Expanded v-if="expanded" :pod="pod"></Expanded>
     </div>
 </template>
 
 <script>
   import { StatusIndicator } from 'vue-status-indicator'
   import 'vue-status-indicator/styles.css'
-  import Container from './PodListItem/Container'
+  import Container from './PodListItem/Containers/Container'
+  import Events from './PodListItem/Events'
+  import Expanded from './PodListItem/Expanded'
 
   export default {
     components: {
+      Expanded,
+      Events,
       Container,
       StatusIndicator
     },
@@ -155,15 +141,4 @@
         color: grey
     .key
         background: #99AAB5
-    .expanded-content
-        margin: 0 -5px 0 15px
-        padding: 5px
-        display: block
-        border: 1px #fff dashed
-        .labels
-            margin-top: 5px
-            ul
-                margin-left: 15px
-            li
-                text-align: left
 </style>

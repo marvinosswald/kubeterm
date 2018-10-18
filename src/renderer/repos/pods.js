@@ -8,6 +8,6 @@ export default {
     api.deleteNamespacedPod(pod.metadata.name, pod.metadata.namespace, K8s.V1DeleteOptions)
   },
   getEvents (pod) {
-    // whas
+    return api.listNamespacedEvent(pod.metadata.namespace, false, false, `involvedObject.uid=${pod.metadata.uid}`)
   }
 }
