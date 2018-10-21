@@ -6,7 +6,9 @@
                 @keyup.native.ctrl.l="openLogs"
                 @keyup.native.ctrl.d="deletePod"
                 @keyup.native.ctrl.e="edit"
-                @keyup.native.F1="toggleExpanded()"
+                @keyup.native.F1="toggleExpanded('f1')"
+                @keyup.native.F2="toggleExpanded('f2')"
+                @keyup.native.F3="toggleExpanded('f3')"
                 @keyup.native.F8="openTreeView()"
                 v-on:input="setSearchInput"
                 v-on:filter="applyFilter"
@@ -19,7 +21,6 @@
                         :pod="pod"
                         :index="index"
                         :class="{active: podIsActive(pod)}"
-                        :expanded="pod === expanded"
                         v-on:beenClicked="selectedIndex = index"
                         v-on:beenClickedRight="toggleExpanded()"
                 ></PodListItem>
@@ -39,7 +40,6 @@
   import SelectResource from './Dialogs/SelectResource'
   import { create } from 'vue-modal-dialogs'
   import Search from './Elements/Search'
-  // const { exec } = require('child_process')
   const K8s = require('@kubernetes/client-node')
   const kc = new K8s.KubeConfig()
   kc.loadFromDefault()
@@ -53,7 +53,6 @@
       return {
         watcher: undefined,
         selectedPods: [],
-        expanded: undefined,
         search: '',
         filter: []
       }
@@ -79,7 +78,9 @@
       },
       ...mapState({
         currentNamespace: state => state.global.currentNamespace,
-        pods: state => state.pods.pods
+        pods: state => state.pods.pods,
+        expanded: state => state.pods.expanded,
+        expandedView: state => state.pods.expandedView
       })
     },
     watch: {
@@ -100,12 +101,15 @@
         return true
       },
       flatTree (tree) {
-        const makeFlat = (o) => {
-          if (o) {
-            return [].concat(...Object.keys(o).map(k => typeof o[k] === 'object' ? makeFlat(o[k]) : {[k.toLowerCase()]: o[k]}))
+        if (tree) {
+          const makeFlat = (o) => {
+            if (o) {
+              return [].concat(...Object.keys(o).map(k => typeof o[k] === 'object' ? makeFlat(o[k]) : {[k.toLowerCase()]: o[k]}))
+            }
           }
+          return Object.assign({}, ...makeFlat(tree))
         }
-        return Object.assign({}, ...makeFlat(tree))
+        return null
       },
       applyFilter (filter) {
         this.filter = filter
@@ -128,13 +132,13 @@
         console.log('stdout:', stdout)
         console.log('stderr:', stderr) */
       },
-      // todo: refactor to use array
-      toggleExpanded () {
+      toggleExpanded (functionKey) {
         if (this.selectedPods.length === 1 && this.expanded !== this.selectedPods[0]) {
-          this.expanded = this.selectedPods[0]
-        } else if (this.expanded === this.selectedPods[0]) {
-          this.expanded = undefined
+          this.setExpandedPod(this.selectedPods[0])
+        } else if (this.expanded === this.selectedPods[0] && functionKey === this.expandedView) {
+          this.setExpandedPod(undefined)
         }
+        this.setExpandedView(functionKey)
       },
       openLogs () {
         localStorage.setItem('LogsOfPodsToWatch', JSON.stringify(this.selectedPods))
@@ -228,7 +232,9 @@
         addPod: 'pods/add',
         updatePod: 'pods/update',
         removePod: 'pods/remove',
-        resetPods: 'pods/reset'
+        resetPods: 'pods/reset',
+        setExpandedPod: 'pods/setExpanded',
+        setExpandedView: 'pods/setExpandedView'
       })
     },
     mounted () {

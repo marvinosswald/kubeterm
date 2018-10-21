@@ -15,15 +15,20 @@
   import Containers from './Containers'
   import Details from './Details'
   import Events from './Events'
+  import { mapState } from 'vuex'
   export default {
     name: 'Expanded',
     props: ['pod'],
     data () {
       return {
-        active: 'f1'
       }
     },
-    components: {Events, Details, Containers}
+    components: {Events, Details, Containers},
+    computed: {
+      ...mapState({
+        active: state => state.pods.expandedView
+      })
+    }
   }
 </script>
 

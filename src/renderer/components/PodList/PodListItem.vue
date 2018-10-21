@@ -21,7 +21,7 @@
                 {{pod.status.startTime | moment("from", "now", true)}}
             </span>
         </div>
-        <Expanded v-if="expanded" :pod="pod"></Expanded>
+        <Expanded v-if="expanded === pod" :pod="pod"></Expanded>
     </div>
 </template>
 
@@ -31,6 +31,7 @@
   import Container from './PodListItem/Containers/Container'
   import Events from './PodListItem/Events'
   import Expanded from './PodListItem/Expanded'
+  import { mapState } from 'vuex'
 
   export default {
     components: {
@@ -40,7 +41,7 @@
       StatusIndicator
     },
     name: 'PodListItem',
-    props: ['pod', 'index', 'expanded'],
+    props: ['pod', 'index'],
     computed: {
       isNegative () {
         const state = this.pod.status.phase
@@ -90,7 +91,10 @@
       podName () {
         const parts = this.pod.metadata.name.split('-')
         return parts[parts.length - 1]
-      }
+      },
+      ...mapState({
+        expanded: state => state.pods.expanded
+      })
     },
     data () {
       return {

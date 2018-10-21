@@ -18,7 +18,17 @@ Vue.use(ModalDialogs)
 Vue.use(TreeView)
 
 Vue.config.keyCodes.F1 = 112
+Vue.config.keyCodes.F2 = 113
+Vue.config.keyCodes.F3 = 114
+Vue.config.keyCodes.F4 = 115
+Vue.config.keyCodes.F5 = 116
+Vue.config.keyCodes.F6 = 117
+Vue.config.keyCodes.F7 = 118
 Vue.config.keyCodes.F8 = 119
+Vue.config.keyCodes.F9 = 120
+Vue.config.keyCodes.F10 = 121
+Vue.config.keyCodes.F11 = 122
+Vue.config.keyCodes.F12 = 123
 
 /* eslint-disable no-new */
 new Vue({

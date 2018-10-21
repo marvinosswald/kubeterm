@@ -30,9 +30,12 @@
     },
     computed: {
       filterKeyOptions () {
-        return Object.keys(this.filterOptions).filter((k) => {
-          return k.indexOf(this.output.substring(1)) !== -1
-        })
+        if (this.filterOptions !== null) {
+          return Object.keys(this.filterOptions).filter((k) => {
+            return k.indexOf(this.output.substring(1)) !== -1
+          })
+        }
+        return []
       }
     },
     watch: {

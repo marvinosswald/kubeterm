@@ -1,5 +1,7 @@
 const state = {
-  pods: []
+  pods: [],
+  expanded: {},
+  expandedView: 'f1'
 }
 
 const mutations = {
@@ -19,6 +21,12 @@ const mutations = {
   },
   reset (state) {
     state.pods = []
+  },
+  setExpanded (state, pod) {
+    state.expanded = pod
+  },
+  setExpandedView (state, functionKey) {
+    state.expandedView = functionKey
   }
 }
 
@@ -34,6 +42,12 @@ const actions = {
   },
   reset ({commit}) {
     commit('reset')
+  },
+  setExpanded ({commit}, pod) {
+    commit('setExpanded', pod)
+  },
+  setExpandedView ({commit}, functionKey) {
+    commit('setExpandedView', functionKey)
   }
 }
 
