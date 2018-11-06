@@ -24,7 +24,7 @@
   "build": {
     "productName": "kubeterm",
     "appId": "de.marvinosswald.kubeterm",
-    "asar": false,
+    "asar": true,
     "directories": {
       "output": "build"
     },
@@ -56,11 +56,14 @@
       "icon": "build/icons"
     }
   },
+  "resolutions": {
+    "**/underscore": "^1.9.1"
+  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.7",
     "@fortawesome/free-solid-svg-icons": "^5.4.2",
     "@fortawesome/vue-fontawesome": "^0.1.1",
-    "@kubernetes/client-node": "^0.6.0",
+    "@kubernetes/client-node": "^0.7.1",
     "axios": "^0.18.0",
     "jsonpath": "^1.0.0",
     "laue": "^0.2.0",
