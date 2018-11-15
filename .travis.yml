@@ -23,7 +23,7 @@ addons:
     - icnsutils
     #- xvfb
 before_install:
-- mkdir -p /tmp/git-lfs && curl -L https://github.com/github/git-lfs/releases/download/v2.6.0/git-lfs-$(["$TRAVIS_OS_NAME" == "linux" ] && echo "linux" || echo "darwin")-amd64-v2.6.0.tar.gz | tar -xz -C /tmp/git-lfs --strip-components 1 && /tmp/git-lfs/git-lfs pull
+- ["$TRAVIS_OS_NAME" == "linux" ] && echo "don't need to install git-lfs on linux" || brew install git-lfs
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install --no-install-recommends -y icnsutils graphicsmagick xz-utils; fi
 install:
 #- export DISPLAY=':99.0'
@@ -33,6 +33,8 @@ install:
 - source ~/.bashrc
 - npm install -g xvfb-maybe
 - yarn
+before_script:
+- git lfs pull
 script:
 #- xvfb-maybe node_modules/.bin/karma start test/unit/karma.conf.js
 #- yarn run pack && xvfb-maybe node_modules/.bin/mocha test/e2e
