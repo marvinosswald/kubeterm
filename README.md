@@ -3,7 +3,7 @@
 This tool is meant for kubernetes operators, to improve their [QOL](https://en.wikipedia.org/wiki/Quality_of_life).
 
 **This is very much ALPHA WIP, but what isn't these days...**
-![](demo.gif)
+![](kubeterm_demo.gif)
 
 
 #### Build Setup
