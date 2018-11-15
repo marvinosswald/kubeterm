@@ -23,7 +23,7 @@ addons:
     - icnsutils
     #- xvfb
 before_install:
-- ["$TRAVIS_OS_NAME" == "linux" ] && echo "don't need to install git-lfs on linux" || brew install git-lfs
+- if [[ "$TRAVIS_OS_NAME" != "linux" ]]; then brew install git-lfs; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install --no-install-recommends -y icnsutils graphicsmagick xz-utils; fi
 install:
 #- export DISPLAY=':99.0'
