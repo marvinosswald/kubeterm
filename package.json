@@ -1,6 +1,6 @@
 {
   "name": "KubeTerm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Marvin Oßwald <mail@marvinosswald.de>",
   "description": "A Terminal for kubernetes operators",
   "license": "GPL-3.0-only",
