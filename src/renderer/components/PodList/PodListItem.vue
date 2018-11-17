@@ -45,8 +45,10 @@
     computed: {
       restarts () {
         let restarts = 0
-        for (let container of this.pod.status.containerStatuses) {
-          restarts += container.restartCount
+        for (let container in this.pod.status.containerStatuses) {
+          if (container.restartCount) {
+            restarts += container.restartCount
+          }
         }
         return restarts
       },
