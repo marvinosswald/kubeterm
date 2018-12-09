@@ -1,6 +1,6 @@
 <template>
     <ul class="events">
-        <li v-for="event in events">
+        <li v-for="event in events" v-bind:class="{error: event.message.indexOf('Error') !== -1}">
             {{event.message}}
         </li>
     </ul>
@@ -31,4 +31,6 @@
         margin-left: 15px
         li
             margin-left: 15px
+            &.error
+                color: red
 </style>

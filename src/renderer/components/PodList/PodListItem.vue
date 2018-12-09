@@ -4,6 +4,9 @@
             <div class="status">
                 <Status :pod="pod"></Status>
             </div>
+            <div class="label namespace" v-if="nsLabel">
+                {{pod.metadata.namespace}}
+            </div>
             <div class="label">
                 <span class="workload">{{workload}}</span>-<span class="ownerReference">{{ownerReference}}</span>-{{podName}}
             </div>
@@ -41,7 +44,7 @@
       Container
     },
     name: 'PodListItem',
-    props: ['pod', 'index'],
+    props: ['pod', 'index', 'nsLabel'],
     computed: {
       restarts () {
         let restarts = 0
@@ -109,6 +112,10 @@
             color: rgba(255,255,255,0.5)
         .workload
             color: #fff
+        &.namespace
+            color: orange
+            max-width: 16vw
+            width: 16vw
     .container-label
         align-self: flex-start
         flex-grow: 1

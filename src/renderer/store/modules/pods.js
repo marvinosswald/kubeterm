@@ -1,3 +1,7 @@
+const K8s = require('@kubernetes/client-node')
+const kc = new K8s.KubeConfig()
+kc.loadFromDefault()
+
 const state = {
   pods: [],
   expanded: {},
@@ -48,6 +52,22 @@ const actions = {
   },
   setExpandedView ({commit}, functionKey) {
     commit('setExpandedView', functionKey)
+  },
+  async getWatcher ({commit}, namespace, doneCb) {
+    let ns = namespace ? `/api/v1/namespaces/${namespace}/pods` : '/api/v1/pods'
+    return new K8s.Watch(kc).watch(
+      ns,
+      {}, (type, pod) => {
+        if (type === 'ADDED') {
+          commit('add', pod)
+        } else if (type === 'MODIFIED') {
+          commit('update', pod)
+        } else if (type === 'DELETED') {
+          commit('remove', pod)
+        } else {
+          console.log('unknown type: ' + type)
+        }
+      }, doneCb)
   }
 }
 

@@ -9,11 +9,5 @@ export default {
   },
   getEvents (pod) {
     return api.listNamespacedEvent(pod.metadata.namespace, false, false, `involvedObject.uid=${pod.metadata.uid}`)
-  },
-  getWatcher (params, cb, doneCb, namespace = null) {
-    let ns = namespace ? `/api/v1/namespaces/${namespace}/pods` : '/api/v1/pods'
-    return new K8s.Watch(kc).watch(
-      ns,
-      params, cb, doneCb)
   }
 }

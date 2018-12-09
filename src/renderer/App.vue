@@ -16,7 +16,7 @@
   import SelectNamespace from './components/Dialogs/SelectNamespace'
   import StatusBar from './components/StatusBar'
   export default {
-    name: 'kubeit',
+    name: 'kubeterm',
     components: {StatusBar, SelectNamespace},
     methods: {
       openSelectNamespaceModal () {

@@ -22,6 +22,7 @@
                 <PodListItem
                         :pod="pod"
                         :index="index"
+                        :ns-label="currentNamespace === null"
                         :class="{active: podIsActive(pod)}"
                         v-on:beenClicked="selectedIndex = index"
                         v-on:beenClickedRight="toggleExpanded()"
@@ -48,7 +49,7 @@
 </template>
 
 <script>
-  import pods from '../repos/pods'
+  import podsRepo from '../repos/pods'
   import PodListItem from './PodList/PodListItem'
   import { mapState, mapActions } from 'vuex'
   import Confirm from './Dialogs/Confirm'
@@ -175,7 +176,7 @@
         const confirm = create(Confirm, 'title', 'content')
         const pod = this.filteredItems[this.selectedIndex]
         if (await confirm('Confirm deletion !', pod.metadata.name)) {
-          pods.deletePod(pod)
+          podsRepo.deletePod(pod)
         }
         this.$refs.search.focus()
       },
@@ -212,29 +213,14 @@
           this.selectedIndex = 0
         }
       },
-      getWatcher (params = {}, cb, doneCb) {
+      startWatcher () {
         if (this.watcher !== undefined) {
           this.watcher.abort()
         }
         this.resetPods()
         this.selectedIndex = undefined
-        this.watcher = pods.getWatcher(params, cb, doneCb, this.currentNamespace)
-      },
-      startWatcher () {
-        this.getWatcher({},
-          (type, obj) => {
-            this.error = undefined
-            if (type === 'ADDED') {
-              this.addPod(obj)
-            } else if (type === 'MODIFIED') {
-              this.updatePod(obj)
-            } else if (type === 'DELETED') {
-              this.removePod(obj)
-            } else {
-              console.log('unknown type: ' + type)
-            }
-          },
-          // done callback is called if the watch terminates normally
+        this.error = undefined
+        this.getWatcher(this.currentNamespace,
           (err) => {
             if (err && err !== null) {
               console.error(err)
@@ -247,6 +233,9 @@
               this.startWatcher()
             }
           })
+          .then((watcher) => {
+            this.watcher = watcher
+          })
         this.$refs.search.focus()
       },
       ...mapActions({
@@ -254,6 +243,7 @@
         updatePod: 'pods/update',
         removePod: 'pods/remove',
         resetPods: 'pods/reset',
+        getWatcher: 'pods/getWatcher',
         setExpandedPod: 'pods/setExpanded',
         setExpandedView: 'pods/setExpandedView'
       })
