@@ -36,4 +36,4 @@ yarn run lint
 
 ---
 
-Made with ☕️ and ❤️.
+Made with ☕️ and  ❤️.
