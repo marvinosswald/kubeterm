@@ -73,18 +73,21 @@
         error: undefined,
         selectedPods: [],
         search: '',
-        filter: [],
+        filter: {},
         mode: 'list'
       }
     },
     computed: {
       filteredItems () {
+        this.selectedPods = []
         let items = this.pods.filter((pod) => {
-          this.selectedPods = []
           return pod.metadata.name.indexOf(this.search) !== -1
         })
-        if (this.filter.length !== 0) {
-          items = items.filter((pod) => this.pairsInObject(pod, this.filter))
+        if (Object.keys(this.filter).length !== 0) {
+          const filteredItems = items.filter((pod) => this.pairsInObject(pod, this.filter))
+          if (filteredItems.length > 0) {
+            items = filteredItems
+          }
         }
         items = items.sort((a, b) => {
           if (a.metadata.name < b.metadata.name) {
@@ -110,15 +113,18 @@
     },
     methods: {
       pairsInObject (obj, pairs) {
+        let res = true
         const flattend = this.flatTree(obj)
         const keys = Object.keys(flattend)
-        for (let pair of pairs) {
-          let i = keys.indexOf(pair.key.toLowerCase())
-          if (i === -1 || flattend[keys[i]] !== pair.value) {
-            return false
+        for (const [key, value] of Object.entries(pairs)) {
+          if (key !== 'tags') {
+            let i = keys.indexOf(key)
+            if (i === -1 || flattend[keys[i]] !== value) {
+              res = false
+            }
           }
         }
-        return true
+        return res
       },
       flatTree (tree) {
         if (tree) {

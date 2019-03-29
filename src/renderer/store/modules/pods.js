@@ -35,25 +35,25 @@ const mutations = {
 }
 
 const actions = {
-  add ({commit}, pod) {
+  add ({ commit }, pod) {
     commit('add', pod)
   },
-  update ({commit}, pod) {
+  update ({ commit }, pod) {
     commit('update', pod)
   },
-  remove ({commit}, pod) {
+  remove ({ commit }, pod) {
     commit('remove', pod)
   },
-  reset ({commit}) {
+  reset ({ commit }) {
     commit('reset')
   },
-  setExpanded ({commit}, pod) {
+  setExpanded ({ commit }, pod) {
     commit('setExpanded', pod)
   },
-  setExpandedView ({commit}, functionKey) {
+  setExpandedView ({ commit }, functionKey) {
     commit('setExpandedView', functionKey)
   },
-  async getWatcher ({commit}, namespace, doneCb) {
+  async getWatcher ({ commit }, namespace, doneCb) {
     let ns = namespace ? `/api/v1/namespaces/${namespace}/pods` : '/api/v1/pods'
     return new K8s.Watch(kc).watch(
       ns,

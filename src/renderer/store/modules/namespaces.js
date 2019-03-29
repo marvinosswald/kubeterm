@@ -11,7 +11,7 @@ const mutations = {
 }
 
 const actions = {
-  getAll ({commit}) {
+  getAll ({ commit }) {
     namespaces.getAll().then((res) => {
       commit('setNamespaces', res.body.items)
     })

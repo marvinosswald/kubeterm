@@ -27,19 +27,19 @@ const mutations = {
 }
 
 const actions = {
-  add ({commit}, node) {
+  add ({ commit }, node) {
     commit('add', node)
   },
-  update ({commit}, node) {
+  update ({ commit }, node) {
     commit('update', node)
   },
-  remove ({commit}, node) {
+  remove ({ commit }, node) {
     commit('remove', node)
   },
-  reset ({commit}) {
+  reset ({ commit }) {
     commit('reset')
   },
-  async getWatcher ({commit}, doneCb) {
+  async getWatcher ({ commit }, doneCb) {
     return new K8s.Watch(kc).watch(
       '/api/v1/nodes',
       {}, (type, node) => {
