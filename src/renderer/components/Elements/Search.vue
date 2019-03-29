@@ -24,6 +24,7 @@
       input () {
         const query = filterable.Query(this.input).parse()
         this.$emit('filter', query.toMongo())
+        this.$emit('input', this.input)
         this.output = this.input
       }
     },

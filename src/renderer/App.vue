@@ -1,6 +1,15 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <el-container>
+      <el-container>
+        <el-aside width="65px">
+          <Menu></Menu>
+        </el-aside>
+        <el-main>
+          <router-view></router-view>
+        </el-main>
+      </el-container>
+    </el-container>
     <modal name="select-namespace" :width="300" :height="400">
       <SelectNamespace></SelectNamespace>
     </modal>
@@ -15,9 +24,10 @@
 <script>
   import SelectNamespace from './components/Dialogs/SelectNamespace'
   import StatusBar from './components/StatusBar'
+  import Menu from './components/Elements/Menu'
   export default {
     name: 'kubeterm',
-    components: {StatusBar, SelectNamespace},
+    components: {Menu, StatusBar, SelectNamespace},
     methods: {
       openSelectNamespaceModal () {
         this.$modal.show('select-namespace')
@@ -85,4 +95,6 @@
       flex-direction: row
     .space-between
       justify-content: space-between
+  .el-main
+    padding: 0 !important
 </style>

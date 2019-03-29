@@ -11,6 +11,10 @@ import TreeView from 'vue-json-tree-view'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faPlug, faBan } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+import ElementUI from 'element-ui'
+import 'element-theme-dark'
+
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
@@ -19,6 +23,7 @@ Vue.use(VModal)
 Vue.use(require('vue-moment'))
 Vue.use(ModalDialogs)
 Vue.use(TreeView)
+Vue.use(ElementUI)
 
 library.add(faPlug)
 library.add(faBan)
