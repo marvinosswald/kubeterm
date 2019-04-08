@@ -34,5 +34,7 @@
 </script>
 
 <style scoped>
-
+    .el-menu-vertical-demo{
+        height: 100%
+    }
 </style>

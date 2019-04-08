@@ -16,15 +16,22 @@
     data () {
       return {
         input: '',
-        filter: {},
+        filter: null,
         output: ''
       }
     },
     watch: {
       input () {
         const query = filterable.Query(this.input).parse()
-        this.$emit('filter', query.toMongo())
-        this.$emit('input', this.input)
+        this.filter = query.toMongo()
+        this.$emit('filter', this.filter)
+        if (this.filter !== null && this.filter.tags) {
+          this.$emit('input', this.filter.tags.$in.join(' '))
+        } else if (this.filter !== null) {
+          this.$emit('input', '')
+        } else {
+          this.$emit('input', this.input)
+        }
         this.output = this.input
       }
     },

@@ -44,7 +44,7 @@
     #wrapper {
         align-self: flex-start;
         position: relative;
-        width: 100vw;
+        width: 100%;
         flex: 1;
     }
 </style>
