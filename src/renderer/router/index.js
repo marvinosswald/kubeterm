@@ -21,6 +21,11 @@ export default new Router({
       component: require('@/components/JsonTreeView').default
     },
     {
+      path: '/configmaps',
+      name: 'ConfigMapsView',
+      component: require('@/components/ConfigMapList/ConfigMapList').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

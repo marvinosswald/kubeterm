@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Container v-for="container in containers" :container="container"></Container>
+        <Container v-for="container in containers" :key="container.metadata.id" :container="container"></Container>
     </div>
 </template>
 
