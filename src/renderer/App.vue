@@ -24,6 +24,7 @@
 <script>
   import SelectNamespace from './components/Dialogs/SelectNamespace'
   import StatusBar from './components/StatusBar'
+  import {mapActions} from 'vuex'
   import Menu from './components/Elements/Menu'
   export default {
     name: 'kubeterm',
@@ -31,7 +32,13 @@
     methods: {
       openSelectNamespaceModal () {
         this.$modal.show('select-namespace')
-      }
+      },
+      ...mapActions({
+        setCurrentNamespace: 'setCurrentNamespace'
+      })
+    },
+    mounted () {
+      //
     }
   }
 </script>

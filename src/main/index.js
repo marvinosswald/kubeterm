@@ -1,7 +1,10 @@
 'use strict'
 
 import { app, BrowserWindow } from 'electron'
-import '../renderer/store/index'
+import store from '../renderer/store/index'
+import * as yaml from 'js-yaml'
+import fs from 'fs'
+import chokidar from 'chokidar'
 
 /**
  * Set `__static` path to static files in production
@@ -44,6 +47,21 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
+  }
+})
+const homedir = require('os').homedir()
+const watcher = chokidar.watch(homedir + '/.kube/config', {
+  persistent: true
+})
+watcher.on('change', path => {
+  try {
+    const doc = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+    const context = doc.contexts.find((context) => context.name === doc['current-context'])
+    store.dispatch('setCurrentNamespaceByString', {
+      namespace: context.context.namespace}
+    )
+  } catch (e) {
+    console.error(e)
   }
 })
 
